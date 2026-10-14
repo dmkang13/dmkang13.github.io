@@ -9,9 +9,11 @@ const story = [
   { topic: "Post Grad - Houston", folder: "post-grad-houston", color: "houston" },
 ];
 
-const extensions = ["jpg", "jpeg", "png", "webp", "avif", "svg"];
 const photosPerSet = 3;
-const photoCacheKey = Date.now().toString(36);
+const photoExtension = /\.(?:avif|jpe?g|png|svg|webp)$/i;
+const photoOrder = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+const localDirectoryHosts = new Set(["localhost", "127.0.0.1", "0.0.0.0", "::1"]);
+const repositoryTreeUrl = "https://api.github.com/repos/dmkang13/dmkang13.github.io/git/trees/main?recursive=1";
 const deck = document.querySelector(".story-deck");
 const progressEl = document.querySelector("[data-progress]");
 const deckControls = document.querySelector(".deck-controls");
@@ -27,6 +29,7 @@ let viewerPhotos = [];
 let viewerIndex = 0;
 let pointerStart = null;
 let carouselTimer = null;
+let repositoryTreePromise = null;
 
 function titleSlide() {
   const section = document.createElement("section");
@@ -74,6 +77,7 @@ function carouselSlide(topic) {
 function closingSlide() {
   const section = document.createElement("section");
   section.className = "slide closing-slide";
+  section.dataset.label = "To be continued";
   section.dataset.kind = "closing";
   section.setAttribute("aria-hidden", "true");
   section.innerHTML = `
@@ -94,42 +98,83 @@ function buildDeck() {
   slides = [...document.querySelectorAll(".slide")];
 }
 
-function tryImage(folder, number, extensionIndex = 0) {
-  return new Promise((resolve) => {
-    if (extensionIndex >= extensions.length) {
-      resolve(null);
-      return;
-    }
-    const path = `photos/life-story/${folder}/${number}.${extensions[extensionIndex]}?v=${photoCacheKey}`;
-    const image = new Image();
-    image.onload = () => resolve(path);
-    image.onerror = () => resolve(tryImage(folder, number, extensionIndex + 1));
-    image.src = path;
+function encodedPath(path) {
+  return path.split("/").map((part) => encodeURIComponent(part)).join("/");
+}
+
+function sortedPhotoPaths(paths) {
+  return [...new Set(paths)].sort((left, right) => {
+    const leftName = decodeURIComponent(left.split("/").pop());
+    const rightName = decodeURIComponent(right.split("/").pop());
+    return photoOrder.compare(leftName, rightName);
   });
 }
 
-async function discoverPhotos(folder) {
-  const found = [];
-  let consecutiveMisses = 0;
-  for (let number = 1; number <= 60; number += 1) {
-    const path = await tryImage(folder, number);
-    if (path) {
-      found.push(path);
-      consecutiveMisses = 0;
-    } else {
-      consecutiveMisses += 1;
-    }
-    if (found.length && consecutiveMisses >= 3) break;
-    if (!found.length && consecutiveMisses >= 6) break;
+async function photosFromLocalDirectory(folder) {
+  const directory = `photos/life-story/${folder}/`;
+  const response = await fetch(directory, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Unable to list ${directory}`);
+  const listing = new DOMParser().parseFromString(await response.text(), "text/html");
+  const directoryUrl = new URL(directory, window.location.href);
+  const paths = [...listing.querySelectorAll("a[href]")].flatMap((link) => {
+    const url = new URL(link.getAttribute("href"), response.url);
+    const relativeName = decodeURIComponent(url.pathname.slice(directoryUrl.pathname.length));
+    if (
+      url.origin !== directoryUrl.origin
+      || !url.pathname.startsWith(directoryUrl.pathname)
+      || relativeName.includes("/")
+      || !photoExtension.test(relativeName)
+    ) return [];
+    return [`${directory}${encodeURIComponent(relativeName)}`];
+  });
+  return sortedPhotoPaths(paths);
+}
+
+async function repositoryTree() {
+  if (!repositoryTreePromise) {
+    repositoryTreePromise = fetch(repositoryTreeUrl, {
+      headers: { Accept: "application/vnd.github+json" },
+    }).then(async (response) => {
+      if (!response.ok) throw new Error("Unable to list Life Story photos from GitHub");
+      const payload = await response.json();
+      if (payload.truncated) throw new Error("The GitHub photo listing was truncated");
+      return payload.tree;
+    }).catch((error) => {
+      repositoryTreePromise = null;
+      throw error;
+    });
   }
-  return found;
+  return repositoryTreePromise;
+}
+
+async function photosFromRepository(folder) {
+  const directory = `photos/life-story/${folder}/`;
+  const paths = (await repositoryTree()).flatMap((entry) => {
+    if (
+      entry.type !== "blob"
+      || !entry.path.startsWith(directory)
+      || entry.path.slice(directory.length).includes("/")
+      || !photoExtension.test(entry.path)
+    ) return [];
+    return [encodedPath(entry.path)];
+  });
+  return sortedPhotoPaths(paths);
+}
+
+function discoverPhotos(folder) {
+  return localDirectoryHosts.has(window.location.hostname)
+    ? photosFromLocalDirectory(folder)
+    : photosFromRepository(folder);
 }
 
 function visibleBatch(slide) {
   const photos = slide.photos || [];
-  if (photos.length <= photosPerSet) return photos;
   const cursor = Number(slide.dataset.cursor);
-  return Array.from({ length: photosPerSet }, (_, index) => photos[(cursor + index) % photos.length]);
+  const batchSize = Math.min(photos.length, photosPerSet);
+  return Array.from({ length: batchSize }, (_, offset) => {
+    const photoIndex = (cursor + offset) % photos.length;
+    return { path: photos[photoIndex], photoIndex };
+  });
 }
 
 function updateCarouselControls(slide) {
@@ -140,14 +185,15 @@ function updateCarouselControls(slide) {
   nextButton.disabled = !canCycle;
 }
 
-function createPhotoCard(slide, path, index, batch) {
+function createPhotoCard(slide, photo) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "photo-card";
   button.style.setProperty("--rotation", "0deg");
-  button.setAttribute("aria-label", `Open photo ${index + 1} of ${batch.length}`);
-  button.innerHTML = `<img src="${path}" alt="${slide.dataset.label}, photo ${index + 1}" /><span>${String(index + 1).padStart(2, "0")}</span>`;
-  button.addEventListener("click", () => openViewer(slide, batch, index));
+  const sequence = photo.photoIndex + 1;
+  button.setAttribute("aria-label", `Open photo ${sequence} of ${slide.photos.length}`);
+  button.innerHTML = `<img src="${photo.path}" alt="${slide.dataset.label}, photo ${sequence}" /><span>${String(sequence).padStart(2, "0")}</span>`;
+  button.addEventListener("click", () => openViewer(slide, slide.photos, photo.photoIndex));
   return button;
 }
 
@@ -156,7 +202,7 @@ function renderCarousel(slide) {
   const batch = visibleBatch(slide);
   grid.innerHTML = "";
   grid.dataset.count = String(batch.length);
-  batch.forEach((path, index) => grid.appendChild(createPhotoCard(slide, path, index, batch)));
+  batch.forEach((photo) => grid.appendChild(createPhotoCard(slide, photo)));
 }
 
 function assignGatherOffsets(grid) {
@@ -170,11 +216,23 @@ function assignGatherOffsets(grid) {
   });
 }
 
-function resetCarouselTimer(slide) {
+function pauseCarouselTimer() {
   window.clearTimeout(carouselTimer);
   carouselTimer = null;
   document.querySelectorAll(".shuffle-timer").forEach((timer) => timer.classList.remove("is-running"));
-  if (!slide || slide.dataset.kind !== "carousel" || !(slide.photos?.length > photosPerSet)) return;
+}
+
+function resetCarouselTimer(slide) {
+  pauseCarouselTimer();
+  if (
+    !slide
+    || slide !== slides[current]
+    || slide.dataset.kind !== "carousel"
+    || !(slide.photos?.length > photosPerSet)
+    || document.hidden
+    || viewer.open
+    || overviewDialog.open
+  ) return;
   const timer = slide.querySelector(".shuffle-timer");
   void timer.offsetWidth;
   timer.classList.add("is-running");
@@ -225,15 +283,27 @@ async function loadCarousel(slide) {
   slide.dataset.loaded = "true";
   const grid = slide.querySelector(".carousel-grid");
   const status = slide.querySelector(".photo-status");
-  const photos = await discoverPhotos(slide.dataset.folder);
+  let photos;
+  try {
+    photos = await discoverPhotos(slide.dataset.folder);
+  } catch (error) {
+    console.error(error);
+    slide.dataset.loaded = "false";
+    grid.classList.remove("is-loading");
+    grid.classList.add("is-empty");
+    grid.innerHTML = `<div class="empty-photo"><span>!</span><b>Photos could not be loaded</b><small>Refresh to try again.</small></div>`;
+    status.textContent = "Photos could not be loaded";
+    return;
+  }
   slide.photos = photos;
   slide.carouselHistory = [0];
   slide.historyIndex = 0;
   grid.classList.remove("is-loading");
+  grid.classList.remove("is-empty");
 
   if (!photos.length) {
     grid.classList.add("is-empty");
-    grid.innerHTML = `<div class="empty-photo"><span>＋</span><b>Add photos here</b><code>photos/life-story/${slide.dataset.folder}/</code><small>Name them 1.jpg, 2.jpg, 3.jpg…</small></div>`;
+    grid.innerHTML = `<div class="empty-photo"><span>＋</span><b>Add photos here</b><code>photos/life-story/${slide.dataset.folder}/</code><small>Use JPG, PNG, WebP, AVIF, or SVG files.</small></div>`;
     status.textContent = "Ready for photos";
     updateCarouselControls(slide);
     return;
@@ -242,7 +312,6 @@ async function loadCarousel(slide) {
   renderCarousel(slide);
   status.textContent = `${photos.length} photo${photos.length === 1 ? "" : "s"} · three shown at a time`;
   updateCarouselControls(slide);
-  resetCarouselTimer(slide);
 }
 
 function indexFromHash() {
@@ -251,8 +320,7 @@ function indexFromHash() {
 }
 
 function showSlide(index, updateHash = true) {
-  window.clearTimeout(carouselTimer);
-  carouselTimer = null;
+  pauseCarouselTimer();
   current = Math.min(Math.max(index, 0), slides.length - 1);
   slides.forEach((slide, slideIndex) => {
     const active = slideIndex === current;
@@ -268,7 +336,9 @@ function showSlide(index, updateHash = true) {
   progressEl.style.width = `${((current + 1) / slides.length) * 100}%`;
   document.title = `${activeSlide.dataset.label} — Dale's Life Story`;
   if (activeSlide.dataset.kind === "carousel") {
-    loadCarousel(activeSlide).then(() => resetCarouselTimer(activeSlide));
+    loadCarousel(activeSlide).then(() => {
+      if (slides[current] === activeSlide) resetCarouselTimer(activeSlide);
+    });
   }
   if (updateHash) history.replaceState(null, "", `#slide-${current + 1}`);
 }
@@ -288,7 +358,7 @@ function buildOverview() {
 }
 
 function openViewer(slide, photos, index) {
-  window.clearTimeout(carouselTimer);
+  pauseCarouselTimer();
   viewerPhotos = photos;
   viewerIndex = index;
   viewer.dataset.place = slide.dataset.label;
@@ -316,12 +386,14 @@ buildOverview();
 document.querySelectorAll("[data-next]").forEach((button) => button.addEventListener("click", () => showSlide(current + 1)));
 document.querySelector("[data-prev]").addEventListener("click", () => showSlide(current - 1));
 document.querySelector("[data-restart]").addEventListener("click", () => showSlide(0));
-document.querySelector("[data-overview]").addEventListener("click", () => overviewDialog.showModal());
-document.querySelector("[data-close-overview]").addEventListener("click", () => overviewDialog.close());
-document.querySelector("[data-close-viewer]").addEventListener("click", () => {
-  viewer.close();
-  resetCarouselTimer(slides[current]);
+document.querySelector("[data-overview]").addEventListener("click", () => {
+  pauseCarouselTimer();
+  overviewDialog.showModal();
 });
+document.querySelector("[data-close-overview]").addEventListener("click", () => overviewDialog.close());
+document.querySelector("[data-close-viewer]").addEventListener("click", () => viewer.close());
+overviewDialog.addEventListener("close", () => resetCarouselTimer(slides[current]));
+viewer.addEventListener("close", () => resetCarouselTimer(slides[current]));
 document.querySelector("[data-viewer-prev]").addEventListener("click", () => moveViewer(-1));
 document.querySelector("[data-viewer-next]").addEventListener("click", () => moveViewer(1));
 document.querySelectorAll("[data-shuffle]").forEach((button) => {
@@ -342,7 +414,7 @@ document.addEventListener("fullscreenchange", () => {
 });
 
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) window.clearTimeout(carouselTimer);
+  if (document.hidden) pauseCarouselTimer();
   else resetCarouselTimer(slides[current]);
 });
 
@@ -389,6 +461,7 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
     showSlide(slides.length - 1);
   } else if (event.key === "Escape") {
+    pauseCarouselTimer();
     overviewDialog.showModal();
   }
 });

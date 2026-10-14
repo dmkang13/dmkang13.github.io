@@ -18,6 +18,8 @@ topic has one folder in `photos/life-story/` and appears as a three-photo carous
 The carousel advances in a fixed order every 30 seconds or on demand. Its Back
 control restores the previously displayed set.
 
-Name files consecutively (`1.jpg`, `2.jpg`, `3.jpg`, and so on). The deck also
-accepts `.jpeg`, `.png`, `.webp`, and `.avif`. See
+Drop supported image files into a topic folder. The deck lists the files that
+are actually present and sorts their names naturally, so numbering can contain
+gaps and extensions can be mixed. It accepts `.jpg`, `.jpeg`, `.png`, `.webp`,
+`.avif`, and `.svg`. See
 `photos/life-story/README.md` for the complete folder map.

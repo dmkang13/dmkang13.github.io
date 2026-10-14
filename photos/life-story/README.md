@@ -13,8 +13,8 @@ post-grad-austin/
 post-grad-houston/
 ```
 
-Drop photos directly into the matching folder. Name them consecutively in the
-order you want them presented:
+Drop photos directly into the matching folder. They are sorted naturally by
+filename, so numeric names remain an easy way to control presentation order:
 
 ```text
 1.jpg
@@ -25,10 +25,11 @@ order you want them presented:
 ...
 ```
 
-JPEG, PNG, WebP, and AVIF files are supported. Do not leave gaps in the number
-sequence. The presentation discovers up to 60 photos per topic, displays three
-at a time, and brings in the next three in filename order every 30 seconds. The
-**Shuffle** button advances immediately and **Back** restores the prior set.
+JPEG, PNG, WebP, AVIF, and SVG files are supported. Gaps and mixed extensions
+are fine: the presentation reads the files that are actually in each folder.
+It displays three at a time and brings in the next three in filename order every
+30 seconds. The **Shuffle** button advances immediately and **Back** restores
+the prior set.
 
 When the total is not divisible by three, the next set wraps to the beginning to
 fill every position. For example, seven photos display as `1–3`, then `4–6`,
