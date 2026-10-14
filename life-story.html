@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#171310" />
+    <meta
+      name="description"
+      content="Dale's Life Story — a photo presentation through the places, people, and music that shaped him."
+    />
+    <title>Dale's Life Story</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=DM+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="life-story.css?v=centered-photo-stage" />
+    <script src="life-story.js?v=photo-cache-refresh" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#story-deck">Skip to the story</a>
+
+    <header class="story-header">
+      <a class="back-link" href="index.html" aria-label="Back to Dale Kang's portfolio">
+        DK<span>.</span> <small>Portfolio</small>
+      </a>
+      <div class="header-actions">
+        <button type="button" data-overview aria-haspopup="dialog">All slides <span>⌘</span></button>
+        <button type="button" data-fullscreen>Present <span>⛶</span></button>
+      </div>
+    </header>
+
+    <main class="story-deck" id="story-deck" aria-live="polite"></main>
+
+    <nav class="deck-controls" aria-label="Slide navigation">
+      <button type="button" data-prev aria-label="Previous slide">←</button>
+      <button type="button" data-next aria-label="Next slide">→</button>
+    </nav>
+    <div class="progress" aria-hidden="true"><span data-progress></span></div>
+
+    <dialog class="overview" data-overview-dialog>
+      <div class="overview-head">
+        <div><p class="eyebrow">Dale's Life Story</p><h2>Choose a moment</h2></div>
+        <button type="button" data-close-overview>Close <span>×</span></button>
+      </div>
+      <nav class="overview-grid" aria-label="Presentation slides"></nav>
+    </dialog>
+
+    <dialog class="photo-viewer" data-photo-viewer>
+      <div class="viewer-top">
+        <p data-viewer-title>Photo</p>
+        <button type="button" data-close-viewer>Close <span>×</span></button>
+      </div>
+      <div class="viewer-stage">
+        <button type="button" data-viewer-prev aria-label="Previous photo">←</button>
+        <img data-viewer-image alt="" />
+        <button type="button" data-viewer-next aria-label="Next photo">→</button>
+      </div>
+      <p class="viewer-count" data-viewer-count></p>
+    </dialog>
+  </body>
+</html>

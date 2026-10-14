@@ -51,6 +51,8 @@ nav a:hover, footer a:hover { color: var(--sage-dark); }
 .nav-talk { padding: .68rem 1rem; border-radius: 99px; color: var(--ink); background: #dce6d3; font-size: .78rem; font-weight: 600; text-decoration: none; transition: .2s ease; }
 .nav-talk:hover { background: var(--sage); transform: translateY(-1px); }
 .nav-talk span { margin-left: .35rem; font-size: .62rem; }
+.nav-story { background: #f1d8c8; }
+.nav-story:hover { background: var(--peach); }
 
 .hero {
   width: min(1180px, calc(100% - 48px));
@@ -217,6 +219,7 @@ footer div { display: flex; gap: 1.4rem; }
 @media (max-width: 520px) {
   .nav-cta { padding: .55rem .8rem; }
   .nav-talk { padding: .55rem .72rem; }
+  .nav-talk span { display: none; }
   .nav-cta { display: none; }
   .hero-actions { align-items: flex-start; flex-direction: column; }
   .section, .experience-section, .about-section { padding-left: 18px; padding-right: 18px; }
