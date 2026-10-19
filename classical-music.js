@@ -8,7 +8,78 @@ const mediaTitle = document.querySelector("[data-media-title]");
 const youtubeLink = document.querySelector("[data-youtube]");
 const overviewDialog = document.querySelector("[data-overview-dialog]");
 const overviewGrid = document.querySelector(".overview-grid");
+const mentiDialog = document.querySelector("[data-menti-dialog]");
+const mentiStage = document.querySelector("[data-menti-stage]");
+const mentiForm = document.querySelector("[data-menti-form]");
+const mentiQuestion = mentiDialog.querySelector("[data-menti-question]");
+const mentiType = mentiDialog.querySelector("[data-menti-type]");
+const mentiCode = document.querySelector("[data-copy-menti-code]");
+const mentiHelp = document.querySelector("[data-menti-help]");
+const mentiResults = document.querySelector("[data-menti-results]");
+const mentiStatus = document.querySelector("[data-menti-status]");
+const mentiJoinLinks = [...mentiDialog.querySelectorAll("[data-menti-join], [data-menti-join-button]")];
+const MENTI_STORAGE_KEY = "classical-music-menti";
 let current = 0;
+
+function loadMentiSettings() {
+  try {
+    return JSON.parse(localStorage.getItem(MENTI_STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+let mentiSettings = loadMentiSettings();
+
+function safeWebUrl(value, fallback = "") {
+  if (!value) return fallback;
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function renderMentiSettings() {
+  const joinUrl = safeWebUrl(mentiSettings.joinUrl, "https://www.menti.com/");
+  const resultsUrl = safeWebUrl(mentiSettings.resultsUrl);
+  const code = String(mentiSettings.code || "").replace(/\D/g, "").slice(0, 8);
+  const configured = Boolean(code || mentiSettings.joinUrl);
+
+  mentiJoinLinks.forEach((link) => { link.href = joinUrl; });
+  mentiCode.textContent = code ? code.replace(/(\d{4})(?=\d)/, "$1 ") : "Set join code";
+  mentiCode.disabled = !code;
+  mentiHelp.textContent = configured
+    ? "Open the participation link on a second device. Responses appear in the presenter view."
+    : "Presenter: add the participation link and code once, then every Menti cue in the talk will use them.";
+  mentiResults.hidden = !resultsUrl;
+  if (resultsUrl) mentiResults.href = resultsUrl;
+  mentiStatus.textContent = configured ? "live" : "setup";
+  mentiStatus.classList.toggle("is-live", configured);
+}
+
+function showMentiSettings() {
+  mentiForm.elements.code.value = mentiSettings.code || "";
+  mentiForm.elements.joinUrl.value = mentiSettings.joinUrl || "";
+  mentiForm.elements.resultsUrl.value = mentiSettings.resultsUrl || "";
+  mentiStage.hidden = true;
+  mentiForm.hidden = false;
+  requestAnimationFrame(() => mentiForm.elements.code.focus());
+}
+
+function hideMentiSettings() {
+  mentiForm.hidden = true;
+  mentiStage.hidden = false;
+}
+
+function openMenti(trigger) {
+  mentiQuestion.textContent = trigger.dataset.mentiQuestion || "Join the live conversation";
+  mentiType.textContent = trigger.dataset.mentiType || "Audience participation";
+  hideMentiSettings();
+  mentiDialog.showModal();
+  if (!mentiSettings.code && !mentiSettings.joinUrl) showMentiSettings();
+}
 
 totalEl.textContent = String(slides.length).padStart(2, "0");
 
@@ -62,9 +133,42 @@ document.querySelectorAll("[data-prev]").forEach((button) => button.addEventList
 document.querySelector("[data-close-media]").addEventListener("click", closeMedia);
 document.querySelector("[data-overview]").addEventListener("click", () => overviewDialog.showModal());
 document.querySelector("[data-close-overview]").addEventListener("click", () => overviewDialog.close());
+document.querySelectorAll("[data-open-menti]").forEach((button) => button.addEventListener("click", () => openMenti(button)));
+document.querySelector("[data-close-menti]").addEventListener("click", () => mentiDialog.close());
+document.querySelector("[data-menti-settings]").addEventListener("click", showMentiSettings);
+document.querySelector("[data-cancel-menti-settings]").addEventListener("click", hideMentiSettings);
+
+mentiForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const data = new FormData(mentiForm);
+  mentiSettings = {
+    code: String(data.get("code") || "").replace(/\D/g, "").slice(0, 8),
+    joinUrl: safeWebUrl(String(data.get("joinUrl") || "")),
+    resultsUrl: safeWebUrl(String(data.get("resultsUrl") || "")),
+  };
+  localStorage.setItem(MENTI_STORAGE_KEY, JSON.stringify(mentiSettings));
+  renderMentiSettings();
+  hideMentiSettings();
+});
+
+mentiCode.addEventListener("click", async () => {
+  if (!mentiSettings.code) return;
+  try {
+    await navigator.clipboard.writeText(mentiSettings.code);
+    const original = mentiCode.textContent;
+    mentiCode.textContent = "Copied";
+    window.setTimeout(() => { mentiCode.textContent = original; }, 1200);
+  } catch {
+    mentiHelp.textContent = `Join code: ${mentiSettings.code}`;
+  }
+});
 
 mediaDialog.addEventListener("click", (event) => {
   if (event.target === mediaDialog) closeMedia();
+});
+
+mentiDialog.addEventListener("click", (event) => {
+  if (event.target === mentiDialog) mentiDialog.close();
 });
 
 document.addEventListener("keydown", (event) => {
@@ -75,7 +179,7 @@ document.addEventListener("keydown", (event) => {
     }
     return;
   }
-  if (overviewDialog.open) return;
+  if (mentiDialog.open || overviewDialog.open) return;
   if (["ArrowRight", "PageDown", " "].includes(event.key)) {
     event.preventDefault();
     showSlide(current + 1);
@@ -88,10 +192,14 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key === "End") {
     event.preventDefault();
     showSlide(slides.length - 1);
+  } else if (event.key.toLowerCase() === "m") {
+    event.preventDefault();
+    openMenti(document.querySelector("[data-open-menti]"));
   } else if (event.key === "Escape") {
     overviewDialog.showModal();
   }
 });
 
 window.addEventListener("hashchange", () => showSlide(indexFromHash(), false));
+renderMentiSettings();
 showSlide(indexFromHash(), false);

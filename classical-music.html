@@ -16,7 +16,10 @@
     <a class="skip-link" href="#slide-1">Skip to presentation</a>
     <header class="deck-header">
       <a class="back-link" href="index.html">DK<span>.</span> <small>Portfolio</small></a>
-      <button class="contents-button" type="button" data-overview aria-expanded="false">All slides <span>⌘</span></button>
+      <div class="header-actions">
+        <button class="menti-button" type="button" data-open-menti data-menti-question="Join the live conversation" data-menti-type="Audience participation">Menti <span data-menti-status>setup</span></button>
+        <button class="contents-button" type="button" data-overview aria-expanded="false">All slides <span>⌘</span></button>
+      </div>
     </header>
 
     <main class="deck" aria-live="polite">
@@ -28,6 +31,9 @@
           <button class="start-button" type="button" data-next>Begin listening <span>→</span></button>
         </div>
         <p class="opening-question">What do you picture?</p>
+        <button class="menti-cue" type="button" data-open-menti data-menti-type="Word cloud" data-menti-question="In one word, what comes to mind when you hear ‘classical music’?">
+          <span>Audience word cloud</span><b>Join on Menti ↗</b>
+        </button>
       </section>
 
       <section class="slide personal-slide" id="slide-2" data-label="My story" aria-hidden="true">
@@ -95,6 +101,9 @@
         <p class="prompt-quote">“Trembling, frozen in the icy snow…”</p>
         <button class="watch-button track" data-video="31tkGPvdMjs" data-start="0" data-end="83" data-title="Vivaldi · Winter"><span>Watch “Winter”</span><b>▶</b></button>
         <p class="reveal-note">Sonnet + score · story encoded</p>
+        <button class="menti-cue" type="button" data-open-menti data-menti-type="Multiple choice" data-menti-question="Before the reveal: which season does this music sound like?">
+          <span>Live audience guess</span><b>Vote on Menti ↗</b>
+        </button>
       </section>
 
       <section class="slide program-slide classical" id="slide-8" data-label="Classical" aria-hidden="true">
@@ -118,6 +127,9 @@
           <p class="kicker">Then listen</p><h2>Bach<br />Chaconne</h2>
           <button class="watch-button track" data-video="ngjEVKxQCWs" data-start="91" data-end="195" data-title="Bach · Chaconne activity"><span>Play excerpt</span><b>▶</b></button>
           <div class="three-words"><span>Place</span><span>Character</span><span>Change</span></div>
+          <button class="menti-cue inline" type="button" data-open-menti data-menti-type="Open response" data-menti-question="Give this music a place, a character, and a change.">
+            <span>Share your three words</span><b>Respond ↗</b>
+          </button>
         </div>
       </section>
 
@@ -140,6 +152,9 @@
         <h2>Who—or what—<br />is moving?</h2>
         <button class="watch-button track" data-video="9MOA-0XvYfw" data-start="0" data-end="91" data-title="Chopin · Étude Op. 10 No. 9"><span>Listen first</span><b>▶</b></button>
         <div class="story-prompts"><span>Direction?</span><span>Weight?</span><span>Destination?</span></div>
+        <button class="menti-cue" type="button" data-open-menti data-menti-type="Open response" data-menti-question="Who—or what—is moving? Describe the story in one sentence.">
+          <span>Build the story together</span><b>Respond on Menti ↗</b>
+        </button>
       </section>
 
       <section class="slide program-slide modern" id="slide-12" data-label="Modern" aria-hidden="true">
@@ -194,7 +209,11 @@
           <img src="https://i.ytimg.com/vi/_JiKI-SK3t0/hqdefault.jpg" alt="" />
           <img src="https://i.ytimg.com/vi/4JZ-o3iAJv4/hqdefault.jpg" alt="" />
         </div>
-        <div class="closing-copy"><p class="kicker">Coda</p><h2>What did<br />you see?</h2><p>Which sound made the clearest picture?</p></div>
+        <div class="closing-copy"><p class="kicker">Coda</p><h2>What did<br />you see?</h2><p>Which sound made the clearest picture?</p>
+          <button class="menti-cue inline" type="button" data-open-menti data-menti-type="Final reflection" data-menti-question="Which sound made the clearest picture—and what did you see?">
+            <span>Final audience reflection</span><b>Share on Menti ↗</b>
+          </button>
+        </div>
       </section>
     </main>
 
@@ -214,6 +233,38 @@
     <dialog class="overview" data-overview-dialog>
       <div class="overview-head"><p>Choose a movement</p><button type="button" data-close-overview>Close ×</button></div>
       <nav class="overview-grid" aria-label="Presentation slides"></nav>
+    </dialog>
+
+    <dialog class="menti-dialog" data-menti-dialog>
+      <div class="menti-shell">
+        <div class="menti-top">
+          <p>Live with Mentimeter</p>
+          <button type="button" data-close-menti>Close <span>×</span></button>
+        </div>
+        <div class="menti-stage" data-menti-stage>
+          <div class="menti-mark" aria-hidden="true">M</div>
+          <p class="kicker" data-menti-type>Audience participation</p>
+          <h2 data-menti-question>Join the live conversation</h2>
+          <div class="menti-join">
+            <div><span>Go to</span><a href="https://www.menti.com" target="_blank" rel="noreferrer" data-menti-join>menti.com</a></div>
+            <div><span>Use code</span><button type="button" class="menti-code" data-copy-menti-code>Set join code</button></div>
+          </div>
+          <p class="menti-help" data-menti-help>Presenter: add the participation link and code once, then every Menti cue in the talk will use them.</p>
+          <div class="menti-actions">
+            <a class="menti-primary" href="https://www.menti.com" target="_blank" rel="noreferrer" data-menti-join-button>Open participant view ↗</a>
+            <a class="menti-secondary" href="https://www.mentimeter.com" target="_blank" rel="noreferrer" data-menti-results hidden>Open live results ↗</a>
+            <button class="menti-secondary" type="button" data-menti-settings>Presenter setup</button>
+          </div>
+        </div>
+        <form class="menti-form" data-menti-form hidden>
+          <div><p class="kicker">Presenter setup</p><h2>Connect this talk<br />to your Menti.</h2></div>
+          <label>Join code <input name="code" inputmode="numeric" autocomplete="off" placeholder="1234 5678" /></label>
+          <label>Participation link <input name="joinUrl" type="url" placeholder="https://www.menti.com/al..." /></label>
+          <label>Presenter or results link <input name="resultsUrl" type="url" placeholder="https://www.mentimeter.com/app/presentation/..." /></label>
+          <p>These details stay in this browser. The audience still responds on their own device, as Mentimeter requires.</p>
+          <div class="menti-form-actions"><button type="button" data-cancel-menti-settings>Cancel</button><button type="submit">Save connection</button></div>
+        </form>
+      </div>
     </dialog>
   </body>
 </html>
