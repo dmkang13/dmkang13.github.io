@@ -140,7 +140,7 @@ Baroque
 ### tracks
 Monteverdi | Dal mio Permesso amato | 0:27–1:23 | https://www.youtube.com/watch?v=mpnwfe9tbfw | 0 | 62
 Pachelbel | Canon in D | 0:00–1:44 | https://www.youtube.com/watch?v=U5AO5G4VwNA | 7 | 70
-J. S. Bach | Chaconne · Partita No. 2 | 0:19–1:20 | https://www.youtube.com/watch?v=ngjEVKxQCWs | 0 | 80
+J. S. Bach | Chaconne · Partita No. 2 | 0:19–1:48 | https://www.youtube.com/watch?v=ngjEVKxQCWs | 0 | 80
 
 ### facts
 **Barroco** (Portuguese) - "misshapen pearl"
@@ -171,13 +171,11 @@ Watch “Winter”
 Vivaldi · Winter
 
 ### video
-https://www.youtube.com/watch?v=31tkGPvdMjs | 0 | 83
+Why should you listen to Vivaldi's "Four Seasons"? - Betsy Schwarm | 0:00 - 2:22 | https://www.youtube.com/watch?v=Xcpc8VDsv3c&t=1s
 
 ### reveal
 Sonnet + score · story encoded
 
-### tracks
-Why should you listen to Vivaldi's "Four Seasons"? - Betsy Schwarm
 
 ### speaker-notes
 Explain that each concerto is paired with a sonnet and specific scenes in the score.
@@ -200,9 +198,9 @@ Classical
 What everyone thinks of when they think Classical
 
 ### tracks
-Joseph Haydn | Cello Concerto No. 1 · III | 0:00–0:58 | https://www.youtube.com/watch?v=cHlS19g1fkY | 0 | 58
-W. A. Mozart | Piano Concerto No. 23 · II | 0:00–1:10 | https://www.youtube.com/watch?v=WGIdipCoQP8 | 0 | 70
-L. van Beethoven | Symphony No. 9 · “Ode to Joy” | 3:08–4:25 | https://www.youtube.com/watch?v=hdWyYn0E4Ys | 188 | 265
+Joseph Haydn | Cello Concerto No. 1 · III | 0:22–1:46 | https://www.youtube.com/watch?v=cHlS19g1fkY | 0 | 58
+W. A. Mozart | Piano Concerto No. 23 · II | 0:00–1:37 | https://www.youtube.com/watch?v=WGIdipCoQP8 | 0 | 70
+L. van Beethoven | Symphony No. 3 · “Eroica” | 0:36–2:09 | https://www.youtube.com/watch?v=DWwppYEEdcI&list=RDDWwppYEEdcI| 188 | 265
 
 ### era-notes
 Clarity · balance · proportion
@@ -252,7 +250,8 @@ Play excerpt
 Bach · Chaconne activity
 
 ### right-video
-https://www.youtube.com/watch?v=ngjEVKxQCWs | 91 | 195
+
+Prelude and Allegro in the Style of Pugnani | https://www.youtube.com/watch?v=ZjPvhOfYfts&list=RDZjPvhOfYfts | 0:04-1:36
 
 ### prompts
 Place
@@ -295,7 +294,7 @@ Hear the voice
 Barber · Adagio for Strings
 
 ### video
-https://www.youtube.com/watch?v=WAoLJ8GbA4Y | 0 | 155
+https://www.youtube.com/watch?v=WAoLJ8GbA4Y | 0:08-1:56 | 0 | 155
 
 ### phrases
 ↗ | reaching
@@ -325,13 +324,13 @@ Romantic
 Inner lives · enormous sound
 
 ### tracks
-Beethoven | “Moonlight” Sonata · III | 0:00–1:02 | https://www.youtube.com/watch?v=u30LsgDAcKs | 0 | 62
-Chopin | Étude Op. 10 No. 4 | 0:00–0:56 | https://www.youtube.com/watch?v=oHiU-u2ddJ4 | 0 | 56
-Tchaikovsky | Piano Concerto No. 1 · opening | 0:00–1:18 | https://www.youtube.com/watch?v=BWerj8FcprM | 0 | 78
-Brahms | Piano Trio No. 1 · I | 0:00–1:07 | https://www.youtube.com/watch?v=neyLy-xGgoE | 0 | 67
-Liszt | Liebestraum No. 3 | 0:00–1:06 | https://www.youtube.com/watch?v=MBOa-2b4uQQ | 0 | 66
-Rachmaninoff | Piano Concerto No. 2 · II | 0:00–1:20 | https://www.youtube.com/watch?v=1Vkpll0jn0A | 0 | 80
-Grieg | Piano Concerto · I | 0:00–1:06 | https://www.youtube.com/watch?v=I1Yoyz6_Los | 0 | 66
+Beethoven | “Moonlight” Sonata · III | 0:00–1:42 | https://www.youtube.com/watch?v=zucBfXpCA6s&list=RDzucBfXpCA6s| 0 | 62
+Chopin | Étude Op. 10 No. 4 | 0:00–1:19 | https://www.youtube.com/watch?v=oHiU-u2ddJ4 | 0 | 56
+Tchaikovsky | Piano Concerto No. 1 · opening | 0:19–1:15 | https://www.youtube.com/watch?v=2DmfJu3oNDM&list=RD2DmfJu3oNDM | 0 | 78
+Brahms | Piano Trio No. 1 · I | 0:00–1:31 | https://www.youtube.com/watch?v=DLBCGF73cHE&list=RDDLBCGF73cHE | 0 | 67
+Schubert | Impromptu No. 3 | 0:00-1:47 | https://www.youtube.com/watch?v=FxhbAGwEYGQ&list=RDFxhbAGwEYGQ
+Rachmaninoff | Piano Concerto No. 2 · II | 1:10–2:43 | https://www.youtube.com/watch?v=cpAyf0EV5-8&list=RDcpAyf0EV5-8 | 0 | 80
+Saint-Saëns | Cello Concerto No. 1 | 0:40–1:43 | https://www.youtube.com/watch?v=pfBkzWNQTpI&list=RDpfBkzWNQTpI | 0 | 66
 
 ### era-notes
 Emotion · individuality · imagination
