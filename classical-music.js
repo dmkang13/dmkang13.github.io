@@ -8,17 +8,6 @@ const mediaTitle = document.querySelector("[data-media-title]");
 const youtubeLink = document.querySelector("[data-youtube]");
 const overviewDialog = document.querySelector("[data-overview-dialog]");
 const overviewGrid = document.querySelector(".overview-grid");
-const mentiDialog = document.querySelector("[data-menti-dialog]");
-const mentiStage = document.querySelector("[data-menti-stage]");
-const mentiForm = document.querySelector("[data-menti-form]");
-const mentiQuestion = mentiDialog.querySelector("[data-menti-question]");
-const mentiType = mentiDialog.querySelector("[data-menti-type]");
-const mentiCode = document.querySelector("[data-copy-menti-code]");
-const mentiHelp = document.querySelector("[data-menti-help]");
-const mentiResults = document.querySelector("[data-menti-results]");
-const mentiJoinLinks = [...document.querySelectorAll("[data-menti-join], [data-menti-join-button]")];
-const mentiQrs = [...document.querySelectorAll("[data-menti-qr]")];
-const MENTI_STORAGE_KEY = "classical-music-menti";
 let current = 0;
 let presentationContent = {};
 
@@ -147,8 +136,11 @@ function applyVideoSettings(track, url, start, end) {
   if (!track) return;
   const id = youtubeId(url);
   if (id) track.dataset.video = id;
+  else delete track.dataset.video;
   if (start !== undefined && start !== "") track.dataset.start = String(Math.max(0, Number(start) || 0));
+  else delete track.dataset.start;
   if (end !== undefined && end !== "") track.dataset.end = String(Math.max(0, Number(end) || 0));
+  else delete track.dataset.end;
 }
 
 function applyVideoField(track, value) {
@@ -187,13 +179,6 @@ function applyVoicePhrases(slide, value) {
   });
 }
 
-function applyMentiContent(slide, content) {
-  if (content["menti-type"] !== undefined) slide.dataset.mentiType = plainText(content["menti-type"]);
-  else delete slide.dataset.mentiType;
-  if (content["menti-question"] !== undefined) slide.dataset.mentiQuestion = plainText(content["menti-question"]);
-  else delete slide.dataset.mentiQuestion;
-}
-
 function applySlideContent(slide, content) {
   if (!content) return;
   if (content.label !== undefined) slide.dataset.label = plainText(content.label);
@@ -206,7 +191,7 @@ function applySlideContent(slide, content) {
   } else if (slide.classList.contains("personal-slide")) {
     setText(slide, ".kicker", content.kicker);
     setRich(slide, "h2", content.title);
-    applyList(slide, ".photo-placeholder span", content["photo-labels"]);
+    applyList(slide, ".personal-photo figcaption", content["photo-labels"]);
   } else if (slide.classList.contains("map-slide")) {
     setText(slide, ".kicker", content.kicker);
     setRich(slide, "h2", content.title);
@@ -242,7 +227,6 @@ function applySlideContent(slide, content) {
     setRich(slide, "h2", content.title);
     setButtonLabel(slide, ".watch-button", content.watch);
     applyList(slide, ".interstellar-prompts span", content.prompts);
-    setRich(slide, ".film-reveal", content.reveal);
   } else if (slide.classList.contains("closing-slide")) {
     setText(slide, ".kicker", content.kicker);
     setRich(slide, "h2", content.title);
@@ -259,7 +243,6 @@ function applySlideContent(slide, content) {
   const firstTrack = slide.querySelector(".track");
   if (firstTrack && content["media-title"] !== undefined) firstTrack.dataset.title = plainText(content["media-title"]);
   applyVideoField(firstTrack, content.video);
-  applyMentiContent(slide, content);
 }
 
 function refreshOverviewLabels() {
@@ -278,76 +261,6 @@ async function loadPresentationContent() {
   } catch (error) {
     console.warn("Using the HTML fallback because slide content could not be loaded.", error);
   }
-}
-
-function loadMentiSettings() {
-  try {
-    return JSON.parse(localStorage.getItem(MENTI_STORAGE_KEY)) || {};
-  } catch {
-    return {};
-  }
-}
-
-let mentiSettings = loadMentiSettings();
-
-function safeWebUrl(value, fallback = "") {
-  if (!value) return fallback;
-  try {
-    const url = new URL(value);
-    return ["http:", "https:"].includes(url.protocol) ? url.href : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function renderMentiSettings() {
-  const joinUrl = safeWebUrl(mentiSettings.joinUrl, "https://www.menti.com/");
-  const resultsUrl = safeWebUrl(mentiSettings.resultsUrl);
-  const code = String(mentiSettings.code || "").replace(/\D/g, "").slice(0, 8);
-  const configured = Boolean(code || mentiSettings.joinUrl);
-  const qrParams = new URLSearchParams({
-    text: joinUrl,
-    size: "240",
-    format: "svg",
-    margin: "2",
-    ecLevel: "M",
-  });
-
-  mentiJoinLinks.forEach((link) => { link.href = joinUrl; });
-  mentiQrs.forEach((qr) => {
-    qr.src = `https://quickchart.io/qr?${qrParams}`;
-    qr.alt = configured ? "QR code for this Mentimeter presentation" : "QR code for menti.com";
-  });
-  mentiCode.textContent = code ? code.replace(/(\d{4})(?=\d)/, "$1 ") : "Set join code";
-  mentiCode.disabled = !code;
-  mentiHelp.textContent = configured
-    ? "Open the participation link on a second device. Responses appear in the presenter view."
-    : "Presenter: add the participation link and code once, then every interactive break in the talk will use them.";
-  mentiResults.hidden = !resultsUrl;
-  if (resultsUrl) mentiResults.href = resultsUrl;
-}
-
-function showMentiSettings() {
-  mentiForm.elements.code.value = mentiSettings.code || "";
-  mentiForm.elements.joinUrl.value = mentiSettings.joinUrl || "";
-  mentiForm.elements.resultsUrl.value = mentiSettings.resultsUrl || "";
-  mentiStage.hidden = true;
-  mentiForm.hidden = false;
-  requestAnimationFrame(() => mentiForm.elements.code.focus());
-}
-
-function hideMentiSettings() {
-  mentiForm.hidden = true;
-  mentiStage.hidden = false;
-}
-
-function openMenti(trigger = slides[current]) {
-  const source = (trigger?.dataset.mentiType || trigger?.dataset.mentiQuestion) ? trigger : slides[current];
-  mentiQuestion.textContent = source.dataset.mentiQuestion || "Join the live conversation";
-  mentiType.textContent = source.dataset.mentiType || "Audience participation";
-  hideMentiSettings();
-  mentiDialog.showModal();
-  if (!mentiSettings.code && !mentiSettings.joinUrl) showMentiSettings();
 }
 
 totalEl.textContent = String(slides.length).padStart(2, "0");
@@ -376,12 +289,13 @@ function closeMedia() {
 }
 
 function openTrack(button) {
-  const { video, start = "0", end, title } = button.dataset;
-  const params = new URLSearchParams({ autoplay: "1", start, rel: "0", modestbranding: "1" });
+  const { video, start, end, title } = button.dataset;
+  const params = new URLSearchParams({ autoplay: "1", rel: "0", modestbranding: "1" });
+  if (start) params.set("start", start);
   if (end) params.set("end", end);
   player.src = `https://www.youtube-nocookie.com/embed/${video}?${params}`;
   mediaTitle.textContent = title;
-  youtubeLink.href = `https://www.youtube.com/watch?v=${video}&t=${start}s`;
+  youtubeLink.href = `https://www.youtube.com/watch?v=${video}${start ? `&t=${start}s` : ""}`;
   mediaDialog.showModal();
 }
 
@@ -402,42 +316,8 @@ document.querySelectorAll("[data-prev]").forEach((button) => button.addEventList
 document.querySelector("[data-close-media]").addEventListener("click", closeMedia);
 document.querySelector("[data-overview]").addEventListener("click", () => overviewDialog.showModal());
 document.querySelector("[data-close-overview]").addEventListener("click", () => overviewDialog.close());
-document.querySelectorAll("[data-open-menti]").forEach((button) => button.addEventListener("click", () => openMenti(button)));
-document.querySelector("[data-close-menti]").addEventListener("click", () => mentiDialog.close());
-document.querySelector("[data-menti-settings]").addEventListener("click", showMentiSettings);
-document.querySelector("[data-cancel-menti-settings]").addEventListener("click", hideMentiSettings);
-
-mentiForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const data = new FormData(mentiForm);
-  mentiSettings = {
-    code: String(data.get("code") || "").replace(/\D/g, "").slice(0, 8),
-    joinUrl: safeWebUrl(String(data.get("joinUrl") || "")),
-    resultsUrl: safeWebUrl(String(data.get("resultsUrl") || "")),
-  };
-  localStorage.setItem(MENTI_STORAGE_KEY, JSON.stringify(mentiSettings));
-  renderMentiSettings();
-  hideMentiSettings();
-});
-
-mentiCode.addEventListener("click", async () => {
-  if (!mentiSettings.code) return;
-  try {
-    await navigator.clipboard.writeText(mentiSettings.code);
-    const original = mentiCode.textContent;
-    mentiCode.textContent = "Copied";
-    window.setTimeout(() => { mentiCode.textContent = original; }, 1200);
-  } catch {
-    mentiHelp.textContent = `Join code: ${mentiSettings.code}`;
-  }
-});
-
 mediaDialog.addEventListener("click", (event) => {
   if (event.target === mediaDialog) closeMedia();
-});
-
-mentiDialog.addEventListener("click", (event) => {
-  if (event.target === mentiDialog) mentiDialog.close();
 });
 
 document.addEventListener("keydown", (event) => {
@@ -448,7 +328,7 @@ document.addEventListener("keydown", (event) => {
     }
     return;
   }
-  if (mentiDialog.open || overviewDialog.open) return;
+  if (overviewDialog.open) return;
   if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable='true']")) return;
   if (["ArrowRight", "PageDown", " "].includes(event.key)) {
     event.preventDefault();
@@ -462,11 +342,6 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key === "End") {
     event.preventDefault();
     showSlide(slides.length - 1);
-  } else if (event.key.toLowerCase() === "m") {
-    if (event.repeat) return;
-    if (!slides[current].dataset.mentiType && !slides[current].dataset.mentiQuestion) return;
-    event.preventDefault();
-    openMenti(slides[current]);
   }
 });
 
@@ -474,7 +349,6 @@ window.addEventListener("hashchange", () => showSlide(indexFromHash(), false));
 
 async function initializePresentation() {
   await loadPresentationContent();
-  renderMentiSettings();
   showSlide(indexFromHash(), false);
 }
 
