@@ -5,6 +5,8 @@ const progressEl = document.querySelector("[data-progress]");
 const mediaDialog = document.querySelector("[data-media]");
 const player = document.querySelector("[data-player]");
 const mediaTitle = document.querySelector("[data-media-title]");
+const mediaRange = document.querySelector("[data-media-range]");
+const mediaStop = document.querySelector("[data-media-stop]");
 const youtubeLink = document.querySelector("[data-youtube]");
 const overviewDialog = document.querySelector("[data-overview-dialog]");
 const overviewGrid = document.querySelector(".overview-grid");
@@ -18,8 +20,275 @@ const mentiHelp = document.querySelector("[data-menti-help]");
 const mentiResults = document.querySelector("[data-menti-results]");
 const mentiStatus = document.querySelector("[data-menti-status]");
 const mentiJoinLinks = [...mentiDialog.querySelectorAll("[data-menti-join], [data-menti-join-button]")];
+const mentiQr = document.querySelector("[data-menti-qr]");
+const mentiRejoinCode = document.querySelector("[data-menti-rejoin-code]");
 const MENTI_STORAGE_KEY = "classical-music-menti";
 let current = 0;
+let presentationContent = {};
+
+function parseSlideMarkdown(markdown) {
+  const content = {};
+  let slideId = "";
+  let field = "";
+
+  markdown.split(/\r?\n/).forEach((line) => {
+    const slideMatch = line.match(/^##\s+(slide-\d+)(?:\s+.+)?$/i);
+    if (slideMatch) {
+      slideId = slideMatch[1].toLowerCase();
+      content[slideId] = content[slideId] || {};
+      field = "";
+      return;
+    }
+
+    const fieldMatch = line.match(/^###\s+([a-z0-9-]+)\s*$/i);
+    if (fieldMatch && slideId) {
+      field = fieldMatch[1].toLowerCase();
+      content[slideId][field] = "";
+      return;
+    }
+
+    if (slideId && field) content[slideId][field] += `${line}\n`;
+  });
+
+  Object.values(content).forEach((slide) => {
+    Object.keys(slide).forEach((key) => { slide[key] = slide[key].trim(); });
+  });
+  return content;
+}
+
+function escapeHtml(value) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function inlineMarkdown(value) {
+  return escapeHtml(value)
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+    .replace(/\n/g, "<br />");
+}
+
+function plainText(value) {
+  return value.replace(/\*\*/g, "").replace(/\*/g, "").replace(/\s*\n\s*/g, " ").trim();
+}
+
+function contentLines(value) {
+  return value.split(/\r?\n/).map((line) => line.replace(/^[-*]\s+/, "").trim()).filter(Boolean);
+}
+
+function contentRows(value) {
+  return contentLines(value).map((line) => line.split("|").map((cell) => cell.trim()));
+}
+
+function setRich(root, selector, value) {
+  if (value === undefined) return;
+  const element = root.querySelector(selector);
+  if (element) element.innerHTML = inlineMarkdown(value);
+}
+
+function setText(root, selector, value) {
+  if (value === undefined) return;
+  const element = root.querySelector(selector);
+  if (element) element.textContent = plainText(value);
+}
+
+function setButtonLabel(root, selector, value) {
+  if (value === undefined) return;
+  const button = root.querySelector(selector);
+  const label = button?.querySelector("span:not(.play)");
+  if (label) label.textContent = plainText(value);
+}
+
+function setLeadingButtonText(root, selector, value) {
+  if (value === undefined) return;
+  const button = root.querySelector(selector);
+  if (!button) return;
+  const textNode = [...button.childNodes].find((node) => node.nodeType === Node.TEXT_NODE);
+  if (textNode) textNode.textContent = `${plainText(value)} `;
+}
+
+function applyList(root, selector, value, columns = 1) {
+  if (value === undefined) return;
+  const rows = contentRows(value);
+  const elements = [...root.querySelectorAll(selector)];
+  elements.forEach((element, index) => {
+    const row = rows[index];
+    element.hidden = !row;
+    if (!row) return;
+    if (columns === 1) {
+      element.innerHTML = inlineMarkdown(row[0]);
+      return;
+    }
+    [...element.children].slice(0, columns).forEach((child, column) => {
+      child.textContent = row[column] || "";
+    });
+  });
+}
+
+function youtubeId(value) {
+  if (!value) return "";
+  if (/^[\w-]{11}$/.test(value)) return value;
+  try {
+    const url = new URL(value);
+    if (url.hostname === "youtu.be") return url.pathname.split("/").filter(Boolean)[0] || "";
+    if (url.hostname === "youtube.com" || url.hostname.endsWith(".youtube.com")) {
+      if (url.searchParams.get("v")) return url.searchParams.get("v");
+      const parts = url.pathname.split("/").filter(Boolean);
+      const embedIndex = parts.findIndex((part) => ["embed", "shorts", "live"].includes(part));
+      return embedIndex >= 0 ? parts[embedIndex + 1] || "" : "";
+    }
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+function applyVideoSettings(track, url, start, end) {
+  if (!track) return;
+  const id = youtubeId(url);
+  if (id) track.dataset.video = id;
+  if (start !== undefined && start !== "") track.dataset.start = String(Math.max(0, Number(start) || 0));
+  if (end !== undefined && end !== "") track.dataset.end = String(Math.max(0, Number(end) || 0));
+}
+
+function applyVideoField(track, value) {
+  if (value === undefined) return;
+  const [url = "", start = "", end = ""] = contentRows(value)[0] || [];
+  applyVideoSettings(track, url, start, end);
+}
+
+function applyTracks(slide, value) {
+  if (value === undefined) return;
+  const rows = contentRows(value);
+  const tracks = [...slide.querySelectorAll(".program-list .track, .era-copy > .track")];
+  tracks.forEach((track, index) => {
+    const row = rows[index];
+    track.hidden = !row;
+    if (!row) return;
+    const [composer = "", work = "", time = "", url = "", start = "", end = ""] = row;
+    track.querySelector("b").textContent = composer;
+    track.querySelector("i").textContent = work;
+    track.querySelector("small").textContent = time;
+    track.dataset.title = [composer, work].filter(Boolean).join(" · ");
+    applyVideoSettings(track, url, start, end);
+  });
+}
+
+function applyVoicePhrases(slide, value) {
+  if (value === undefined) return;
+  const rows = contentRows(value);
+  [...slide.querySelectorAll(".voice-phrases span")].forEach((phrase, index) => {
+    const row = rows[index];
+    phrase.hidden = !row;
+    if (!row) return;
+    phrase.querySelector("b").textContent = row[0] || "";
+    const textNode = [...phrase.childNodes].find((node) => node.nodeType === Node.TEXT_NODE);
+    if (textNode) textNode.textContent = ` ${row[1] || ""}`;
+  });
+}
+
+function applyMentiContent(slide, content) {
+  const cue = slide.querySelector(".menti-cue");
+  if (!cue) return;
+  if (content["menti-type"] !== undefined) cue.dataset.mentiType = plainText(content["menti-type"]);
+  if (content["menti-question"] !== undefined) cue.dataset.mentiQuestion = plainText(content["menti-question"]);
+  setText(cue, "span", content["menti-label"]);
+  setText(cue, "b", content["menti-action"]);
+}
+
+function applySlideContent(slide, content) {
+  if (!content) return;
+  if (content.label !== undefined) slide.dataset.label = plainText(content.label);
+
+  if (slide.id === "slide-1") {
+    setText(slide, ".kicker", content.kicker);
+    setRich(slide, "h1", content.title);
+    setLeadingButtonText(slide, ".start-button", content.start);
+    setText(slide, ".opening-question", content.question);
+  } else if (slide.classList.contains("personal-slide")) {
+    setText(slide, ".kicker", content.kicker);
+    setRich(slide, "h2", content.title);
+    applyList(slide, ".photo-placeholder span", content["photo-labels"]);
+  } else if (slide.classList.contains("map-slide")) {
+    setText(slide, ".kicker", content.kicker);
+    setRich(slide, "h2", content.title);
+    applyList(slide, ".era-map li", content.eras, 3);
+  } else if (slide.classList.contains("era-slide")) {
+    setText(slide, ".kicker", content.kicker);
+    setRich(slide, "h2", content.title);
+    applyTracks(slide, content.tracks);
+    setRich(slide, ".margin-note", content.note);
+  } else if (slide.classList.contains("program-slide")) {
+    setText(slide, ".program-head .kicker", content.kicker);
+    setRich(slide, ".program-head h2", content.title);
+    setRich(slide, ".program-head > p:last-child", content.subtitle);
+    applyTracks(slide, content.tracks);
+    applyList(slide, ".fact-stack span", content["era-notes"] ?? content.facts);
+  } else if (slide.classList.contains("activity-slide")) {
+    setText(slide, ".film-half .kicker", content["left-kicker"]);
+    setRich(slide, ".film-half h2", content["left-title"]);
+    setRich(slide, ".film-half .subtitle", content["left-subtitle"]);
+    setButtonLabel(slide, ".film-half .watch-button", content["left-watch"]);
+    setText(slide, ".bach-half .kicker", content["right-kicker"]);
+    setRich(slide, ".bach-half h2", content["right-title"]);
+    setButtonLabel(slide, ".bach-half .watch-button", content["right-watch"]);
+    applyList(slide, ".three-words span", content.prompts);
+    const tracks = slide.querySelectorAll(".track");
+    if (content["left-media-title"] !== undefined) tracks[0].dataset.title = plainText(content["left-media-title"]);
+    if (content["right-media-title"] !== undefined) tracks[1].dataset.title = plainText(content["right-media-title"]);
+    applyVideoField(tracks[0], content["left-video"]);
+    applyVideoField(tracks[1], content["right-video"]);
+  } else if (slide.classList.contains("voice-slide")) {
+    setText(slide, ".kicker", content.kicker);
+    setRich(slide, "h2", content.title);
+    setButtonLabel(slide, ".watch-button", content.watch);
+    applyVoicePhrases(slide, content.phrases);
+  } else if (slide.classList.contains("interstellar-slide")) {
+    setText(slide, ".kicker", content.kicker);
+    setRich(slide, "h2", content.title);
+    setButtonLabel(slide, ".watch-button", content.watch);
+    applyList(slide, ".interstellar-prompts span", content.prompts);
+    setRich(slide, ".film-reveal", content.reveal);
+  } else if (slide.classList.contains("closing-slide")) {
+    setText(slide, ".kicker", content.kicker);
+    setRich(slide, "h2", content.title);
+    setText(slide, ".closing-copy > p:last-of-type", content.question);
+  } else if (slide.classList.contains("break-slide")) {
+    setText(slide, ".kicker", content.kicker);
+    setRich(slide, "h2", content.title);
+    setRich(slide, ".prompt-quote", content.quote);
+    setButtonLabel(slide, ".watch-button", content.watch);
+    setText(slide, ".reveal-note", content.reveal);
+    applyList(slide, ".story-prompts span", content.prompts);
+  }
+
+  const firstTrack = slide.querySelector(".track");
+  if (firstTrack && content["media-title"] !== undefined) firstTrack.dataset.title = plainText(content["media-title"]);
+  applyVideoField(firstTrack, content.video);
+  applyMentiContent(slide, content);
+}
+
+function refreshOverviewLabels() {
+  [...overviewGrid.querySelectorAll("button span")].forEach((label, index) => {
+    label.textContent = slides[index].dataset.label;
+  });
+}
+
+async function loadPresentationContent() {
+  try {
+    const response = await fetch("classical-music-content.md", { cache: "no-store" });
+    if (!response.ok) throw new Error(`Content request failed with ${response.status}`);
+    presentationContent = parseSlideMarkdown(await response.text());
+    slides.forEach((slide) => applySlideContent(slide, presentationContent[slide.id]));
+    refreshOverviewLabels();
+  } catch (error) {
+    console.warn("Using the HTML fallback because slide content could not be loaded.", error);
+  }
+}
 
 function loadMentiSettings() {
   try {
@@ -46,8 +315,18 @@ function renderMentiSettings() {
   const resultsUrl = safeWebUrl(mentiSettings.resultsUrl);
   const code = String(mentiSettings.code || "").replace(/\D/g, "").slice(0, 8);
   const configured = Boolean(code || mentiSettings.joinUrl);
+  const qrParams = new URLSearchParams({
+    text: joinUrl,
+    size: "240",
+    format: "svg",
+    margin: "2",
+    ecLevel: "M",
+  });
 
   mentiJoinLinks.forEach((link) => { link.href = joinUrl; });
+  mentiQr.src = `https://quickchart.io/qr?${qrParams}`;
+  mentiQr.alt = configured ? "QR code for this Mentimeter presentation" : "QR code for menti.com";
+  mentiRejoinCode.textContent = code ? `Code ${code.replace(/(\d{4})(?=\d)/, "$1 ")}` : "menti.com";
   mentiCode.textContent = code ? code.replace(/(\d{4})(?=\d)/, "$1 ") : "Set join code";
   mentiCode.disabled = !code;
   mentiHelp.textContent = configured
@@ -106,12 +385,26 @@ function closeMedia() {
   if (mediaDialog.open) mediaDialog.close();
 }
 
+function formatTime(totalSeconds) {
+  const seconds = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainder = String(seconds % 60).padStart(2, "0");
+  return hours
+    ? `${hours}:${String(minutes).padStart(2, "0")}:${remainder}`
+    : `${minutes}:${remainder}`;
+}
+
 function openTrack(button) {
   const { video, start = "0", end, title } = button.dataset;
   const params = new URLSearchParams({ autoplay: "1", start, rel: "0", modestbranding: "1" });
   if (end) params.set("end", end);
   player.src = `https://www.youtube-nocookie.com/embed/${video}?${params}`;
   mediaTitle.textContent = title;
+  const startLabel = formatTime(start);
+  const endLabel = end ? formatTime(end) : "the end";
+  mediaRange.textContent = `${startLabel} → ${endLabel}`;
+  mediaStop.textContent = `Stop at ${endLabel}`;
   youtubeLink.href = `https://www.youtube.com/watch?v=${video}&t=${start}s`;
   mediaDialog.showModal();
 }
@@ -180,6 +473,7 @@ document.addEventListener("keydown", (event) => {
     return;
   }
   if (mentiDialog.open || overviewDialog.open) return;
+  if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable='true']")) return;
   if (["ArrowRight", "PageDown", " "].includes(event.key)) {
     event.preventDefault();
     showSlide(current + 1);
@@ -193,13 +487,18 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
     showSlide(slides.length - 1);
   } else if (event.key.toLowerCase() === "m") {
+    if (event.repeat) return;
     event.preventDefault();
     openMenti(document.querySelector("[data-open-menti]"));
-  } else if (event.key === "Escape") {
-    overviewDialog.showModal();
   }
 });
 
 window.addEventListener("hashchange", () => showSlide(indexFromHash(), false));
-renderMentiSettings();
-showSlide(indexFromHash(), false);
+
+async function initializePresentation() {
+  await loadPresentationContent();
+  renderMentiSettings();
+  showSlide(indexFromHash(), false);
+}
+
+initializePresentation();
