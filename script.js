@@ -1,15 +1,21 @@
-const toggles = document.querySelectorAll(".role-toggle");
+const timeline = document.querySelector("[data-timeline]");
+const year = document.querySelector("[data-year]");
 
-toggles.forEach((toggle) => {
-  toggle.addEventListener("click", () => {
-    const role = toggle.closest(".role");
-    const details = role.querySelector(".role-details");
-    const icon = toggle.querySelector(".role-icon");
-    const expanded = toggle.getAttribute("aria-expanded") === "true";
+if (year) year.textContent = new Date().getFullYear();
 
-    toggle.setAttribute("aria-expanded", String(!expanded));
-    details.hidden = expanded;
-    role.classList.toggle("open", !expanded);
-    icon.textContent = expanded ? "＋" : "−";
-  });
-});
+if (timeline) {
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        timeline.classList.add("is-visible");
+        observer.disconnect();
+      },
+      { threshold: 0.2 }
+    );
+
+    observer.observe(timeline);
+  } else {
+    timeline.classList.add("is-visible");
+  }
+}
