@@ -7,9 +7,9 @@ This file controls the visible text in `classical-music.html`.
 - A new line inside `title`, `note`, or `reveal` creates a deliberate line break.
 - Use `*italics*` or `**bold**` where useful.
 - For `tracks`, use one line per piece:
-  `Composer | Work | Display time | YouTube URL | Start seconds | End seconds`.
+  `Composer | Work | Display time (x:xx - x:xx) | YouTube URL | Start seconds | End seconds`.
 - For a single video, use `YouTube URL | Start seconds | End seconds` under
-  `video`, `left-video`, or `right-video`.
+  `video`.
 - `speaker-notes` are presenter preparation only and are not shown in the HTML
   deck. They can use multiple lines, `*italics*`, and `**bold**`. They are not
   private if this Markdown file is included in a public deployment.
@@ -27,12 +27,6 @@ A listening journey · Dale Kang
 ### title
 Classical music
 *passion talk*
-
-### menti-type
-Word cloud
-
-### menti-action
-Join on Menti ↗
 
 ### speaker-notes
 Welcome everyone and frame this as a listening journey, not a lecture.
@@ -93,7 +87,7 @@ Early &
 Medieval
 
 ### tracks
-Pérotin | Viderunt omnes | 0:12–0:42 | https://www.youtube.com/watch?v=Q2JvIyStzNA | 8 | 75
+Pérotin | Viderunt omnes | 0:12 - 0:42 | https://www.youtube.com/watch?v=Q2JvIyStzNA | 12 | 42
 
 ### note
 Monophony · Polyphony · Church modes not scales
@@ -116,7 +110,7 @@ c. 1400–1600
 Renaissance
 
 ### tracks
-Thomas Tallis | Spem in alium | 0:16–1:28 | https://www.youtube.com/watch?v=Z3FJxDsa-5k | 0 | 74
+Thomas Tallis | Spem in alium | 0:16 - 1:28 | https://www.youtube.com/watch?v=Z3FJxDsa-5k | 16 | 88
 
 ### note
 40 independent voices
@@ -138,9 +132,9 @@ Baroque
 Baroque
 
 ### tracks
-Monteverdi | Dal mio Permesso amato | 0:27–1:23 | https://www.youtube.com/watch?v=mpnwfe9tbfw | 0 | 62
-Pachelbel | Canon in D | 0:00–1:44 | https://www.youtube.com/watch?v=U5AO5G4VwNA | 7 | 70
-J. S. Bach | Chaconne · Partita No. 2 | 0:19–1:48 | https://www.youtube.com/watch?v=ngjEVKxQCWs | 0 | 80
+Monteverdi | Dal mio Permesso amato | 0:27 - 1:23 | https://www.youtube.com/watch?v=mpnwfe9tbfw | 27 | 83
+Pachelbel | Canon in D | 0:00 - 1:44 | https://www.youtube.com/watch?v=U5AO5G4VwNA | 0 | 104
+J. S. Bach | Chaconne · Partita No. 2 | 0:19 - 1:48 | https://www.youtube.com/watch?v=ngjEVKxQCWs | 19 | 108
 
 ### facts
 **Barroco** (Portuguese) - "misshapen pearl"
@@ -171,7 +165,7 @@ Watch “Winter”
 Vivaldi · Winter
 
 ### video
-Why should you listen to Vivaldi's "Four Seasons"? - Betsy Schwarm | 0:00 - 2:22 | https://www.youtube.com/watch?v=Xcpc8VDsv3c&t=1s
+https://www.youtube.com/watch?v=Xcpc8VDsv3c | 0 | 142
 
 ### reveal
 Sonnet + score · story encoded
@@ -198,9 +192,9 @@ Classical
 What everyone thinks of when they think Classical
 
 ### tracks
-Joseph Haydn | Cello Concerto No. 1 · III | 0:22–1:46 | https://www.youtube.com/watch?v=cHlS19g1fkY | 0 | 58
-W. A. Mozart | Piano Concerto No. 23 · II | 0:00–1:37 | https://www.youtube.com/watch?v=WGIdipCoQP8 | 0 | 70
-L. van Beethoven | Symphony No. 3 · “Eroica” | 0:36–2:09 | https://www.youtube.com/watch?v=DWwppYEEdcI&list=RDDWwppYEEdcI| 188 | 265
+Joseph Haydn | Cello Concerto No. 1 · III | 0:22 - 1:46 | https://www.youtube.com/watch?v=cHlS19g1fkY | 22 | 106
+W. A. Mozart | Piano Concerto No. 23 · II | 0:00 - 1:37 | https://www.youtube.com/watch?v=WGIdipCoQP8 | 0 | 97
+L. van Beethoven | Symphony No. 3 · “Eroica” | 0:36 - 2:09 | https://www.youtube.com/watch?v=DWwppYEEdcI&list=RDDWwppYEEdcI | 36 | 129
 
 ### era-notes
 Clarity · balance · proportion
@@ -212,46 +206,53 @@ Present the Classical spirit as conversation: clear ideas, balanced phrases, and
 Haydn shows wit and proportion; Mozart makes the soloist feel like a speaking character.
 Beethoven stretches that order until the symphony itself breaks into song.
 
-## slide-9 — Watch & imagine
+## slide-9 — Salieri hears Mozart
 
 ### label
-Watch & imagine
+Salieri hears Mozart
 
-### left-kicker
+### kicker
 Watch
 
-### left-title
+### title
 Salieri hears
 Mozart
 
-### left-subtitle
+### subtitle
 A scene from *Amadeus*
 
-### left-watch
+### watch
 Play scene
 
-### left-media-title
+### media-title
 Amadeus · Salieri describes Mozart
 
-### left-video
+### video
 https://www.youtube.com/watch?v=pxgZcMGmkkI | 0 | 142
 
-### right-kicker
+### speaker-notes
+Use the *Amadeus* scene as a model for active listening: Salieri hears character, conflict, and surprise.
+Let the scene finish before advancing to the audience listening activity.
+
+## slide-10 — Listening activity
+
+### label
+Listening activity
+
+### kicker
 Then listen
 
-### right-title
-Bach
-Chaconne
+### title
+What do you get out of classical music?
 
-### right-watch
+### watch
 Play excerpt
 
-### right-media-title
-Bach · Chaconne activity
+### media-title
+Listening activity
 
-### right-video
-
-Prelude and Allegro in the Style of Pugnani | https://www.youtube.com/watch?v=ZjPvhOfYfts&list=RDZjPvhOfYfts | 0:04-1:36
+### video
+https://www.youtube.com/watch?v=ZjPvhOfYfts&list=RDZjPvhOfYfts | 4 | 96
 
 ### prompts
 Place
@@ -262,52 +263,15 @@ Change
 Open response
 
 ### menti-question
-Give this music a place, a character, and a change.
+Describe this piece of music
 
-### menti-label
-Share your three words
 
 ### menti-action
 Respond ↗
 
 ### speaker-notes
-Use the *Amadeus* scene as a model for active listening: Salieri hears character, conflict, and surprise.
-Then play the Bach excerpt without explaining it first.
+Play the Bach excerpt without explaining it first.
 Give the room a quiet beat before asking for a place, a character, and a change.
-
-## slide-10 — A human voice
-
-### label
-A human voice
-
-### kicker
-Listening break
-
-### title
-One voice.
-Only strings.
-
-### watch
-Hear the voice
-
-### media-title
-Barber · Adagio for Strings
-
-### video
-https://www.youtube.com/watch?v=WAoLJ8GbA4Y | 0:08-1:56 | 0 | 155
-
-### phrases
-↗ | reaching
-··· | insisting
-— | one breath
-◢ | pressure
-∅ | voice breaks
-↘ | release
-
-### speaker-notes
-Ask the audience to follow the strings as though they were one singer taking a single breath.
-Point out reaching, pressure, the breaking point, and release only after they hear the contour.
-Keep the explanation spare so the emotional arc has room to land.
 
 ## slide-11 — Romantic
 
@@ -321,16 +285,17 @@ Romantic
 Romantic
 
 ### subtitle
-Inner lives · enormous sound
+Deep emotion
+Enormous sound
 
 ### tracks
-Beethoven | “Moonlight” Sonata · III | 0:00–1:42 | https://www.youtube.com/watch?v=zucBfXpCA6s&list=RDzucBfXpCA6s| 0 | 62
-Chopin | Étude Op. 10 No. 4 | 0:00–1:19 | https://www.youtube.com/watch?v=oHiU-u2ddJ4 | 0 | 56
-Tchaikovsky | Piano Concerto No. 1 · opening | 0:19–1:15 | https://www.youtube.com/watch?v=2DmfJu3oNDM&list=RD2DmfJu3oNDM | 0 | 78
-Brahms | Piano Trio No. 1 · I | 0:00–1:31 | https://www.youtube.com/watch?v=DLBCGF73cHE&list=RDDLBCGF73cHE | 0 | 67
-Schubert | Impromptu No. 3 | 0:00-1:47 | https://www.youtube.com/watch?v=FxhbAGwEYGQ&list=RDFxhbAGwEYGQ
-Rachmaninoff | Piano Concerto No. 2 · II | 1:10–2:43 | https://www.youtube.com/watch?v=cpAyf0EV5-8&list=RDcpAyf0EV5-8 | 0 | 80
-Saint-Saëns | Cello Concerto No. 1 | 0:40–1:43 | https://www.youtube.com/watch?v=pfBkzWNQTpI&list=RDpfBkzWNQTpI | 0 | 66
+Beethoven | “Moonlight” Sonata · III | 0:00 - 1:42 | https://www.youtube.com/watch?v=zucBfXpCA6s&list=RDzucBfXpCA6s | 0 | 102
+Chopin | Étude Op. 10 No. 4 | 0:00 - 1:19 | https://www.youtube.com/watch?v=oHiU-u2ddJ4 | 0 | 79
+Tchaikovsky | Piano Concerto No. 1 · opening | 0:19 - 1:15 | https://www.youtube.com/watch?v=2DmfJu3oNDM&list=RD2DmfJu3oNDM | 19 | 75
+Brahms | Piano Trio No. 1 · I | 0:00 - 1:31 | https://www.youtube.com/watch?v=DLBCGF73cHE&list=RDDLBCGF73cHE | 0 | 91
+Schubert | Impromptu No. 3 | 0:00 - 1:47 | https://www.youtube.com/watch?v=FxhbAGwEYGQ&list=RDFxhbAGwEYGQ | 0 | 107
+Rachmaninoff | Piano Concerto No. 2 · II | 1:10 - 2:43 | https://www.youtube.com/watch?v=cpAyf0EV5-8&list=RDcpAyf0EV5-8 | 70 | 163
+Saint-Saëns | Cello Concerto No. 1 | 0:40 - 1:43 | https://www.youtube.com/watch?v=pfBkzWNQTpI&list=RDpfBkzWNQTpI | 40 | 103
 
 ### era-notes
 Emotion · individuality · imagination
@@ -342,48 +307,38 @@ Describe the Romantic spirit as the individual voice pushed to its expressive li
 Forms become more flexible, harmony more chromatic, and orchestral color more intense.
 Use the excerpts as quick contrasts: urgency, intimacy, grandeur, longing, and recovery.
 
-## slide-12 — Your story
+## slide-12 — A human voice
 
 ### label
-Your story
+A human voice
 
 ### kicker
 Listening break
 
 ### title
-Who—or what—
-is moving?
+Mimicking the human voice
 
 ### watch
-Listen first
+Barber's Adagio for Strings
 
 ### media-title
-Chopin · Étude Op. 10 No. 9
+Barber · Adagio for Strings
 
 ### video
-https://www.youtube.com/watch?v=9MOA-0XvYfw | 0 | 91
+https://www.youtube.com/watch?v=WAoLJ8GbA4Y | 8 | 116
 
-### prompts
-Direction?
-Weight?
-Destination?
-
-### menti-type
-Open response
-
-### menti-question
-Who—or what—is moving? Describe the story in one sentence.
-
-### menti-label
-Build the story together
-
-### menti-action
-Respond on Menti ↗
+### phrases
+↗ | reaching
+··· | insisting
+— | one breath
+◢ | pressure
+∅ | voice breaks
+↘ | release
 
 ### speaker-notes
-Ask everyone to invent a moving subject before discussing composer or form.
-Prompt with direction, weight, and destination if the room needs help.
-Accept different stories—the exercise demonstrates that musical motion can feel concrete without words.
+Ask the audience to follow the strings as though they were one singer taking a single breath.
+Point out reaching, pressure, the breaking point, and release only after they hear the contour.
+Keep the explanation spare so the emotional arc has room to land.
 
 ## slide-13 — Modern
 
@@ -400,13 +355,13 @@ Modern
 Color · fracture · new voices
 
 ### tracks
-Debussy | Arabesque No. 1 | 0:00–1:04 | https://www.youtube.com/watch?v=JCTQTp1PdnA | 0 | 64
-Ravel | Pavane for a Dead Princess | 0:00–1:10 | https://www.youtube.com/watch?v=_JiKI-SK3t0 | 0 | 70
-Barber | Violin Concerto · I | 0:08–1:16 | https://www.youtube.com/watch?v=cAnxgU_45H4 | 8 | 76
-Sibelius | Violin Concerto · III | 0:00–1:08 | https://www.youtube.com/watch?v=Xs4BIMf8lHk | 0 | 68
-Shostakovich | Symphony No. 5 · IV | 0:00–1:10 | https://www.youtube.com/watch?v=re2gQXy9C-M | 0 | 70
-Gershwin | Rhapsody in Blue | 0:00–1:02 | https://www.youtube.com/watch?v=cH2PH0auTUU | 0 | 62
-Copland | Corral Nocturne · Rodeo | 0:00–1:12 | https://www.youtube.com/watch?v=iy8D1gNoZFc | 0 | 72
+Debussy | Arabesque No. 1 | 0:00 - 1:04 | https://www.youtube.com/watch?v=JCTQTp1PdnA | 0 | 64
+Ravel | Pavane for a Dead Princess | 0:00 - 1:10 | https://www.youtube.com/watch?v=_JiKI-SK3t0 | 0 | 70
+Barber | Violin Concerto · I | 0:08 - 1:16 | https://www.youtube.com/watch?v=cAnxgU_45H4 | 8 | 76
+Sibelius | Violin Concerto · III | 0:00 - 1:08 | https://www.youtube.com/watch?v=Xs4BIMf8lHk | 0 | 68
+Shostakovich | Symphony No. 5 · IV | 0:00 - 1:10 | https://www.youtube.com/watch?v=re2gQXy9C-M | 0 | 70
+Gershwin | Rhapsody in Blue | 0:00 - 1:02 | https://www.youtube.com/watch?v=cH2PH0auTUU | 0 | 62
+Copland | Corral Nocturne · Rodeo | 0:00 - 1:12 | https://www.youtube.com/watch?v=iy8D1gNoZFc | 0 | 72
 
 ### era-notes
 Tonal boundaries loosen
@@ -433,8 +388,8 @@ Contemporary
 Story becomes visible
 
 ### tracks
-John Williams | Harry’s Wondrous World | 0:00–1:18 | https://www.youtube.com/watch?v=yB-c85V8Zsg | 0 | 78
-Ludwig Göransson | Can You Hear the Music? | 0:00–1:28 | https://www.youtube.com/watch?v=4JZ-o3iAJv4 | 0 | 88
+John Williams | Harry’s Wondrous World | 0:00 - 1:18 | https://www.youtube.com/watch?v=yB-c85V8Zsg | 0 | 78
+Ludwig Göransson | Can You Hear the Music? | 0:00 - 1:28 | https://www.youtube.com/watch?v=4JZ-o3iAJv4 | 0 | 88
 
 ### era-notes
 Pluralism · minimalism · global voices
@@ -475,6 +430,12 @@ Time
 ### reveal
 **One page:** parent + child *→* pipe organ *→* cosmos
 
+### menti-type
+Audience participation
+
+### menti-question
+Need to join the Menti?
+
 ### speaker-notes
 Play the excerpt before naming the film if possible.
 Ask for scale, setting, relationship, and time; collect a few fast answers.
@@ -494,18 +455,6 @@ you see?
 
 ### question
 Which sound made the clearest picture?
-
-### menti-type
-Final reflection
-
-### menti-question
-Which sound made the clearest picture—and what did you see?
-
-### menti-label
-Final audience reflection
-
-### menti-action
-Share on Menti ↗
 
 ### speaker-notes
 Return to the opening question: what did the audience picture now?

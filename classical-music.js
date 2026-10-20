@@ -5,8 +5,6 @@ const progressEl = document.querySelector("[data-progress]");
 const mediaDialog = document.querySelector("[data-media]");
 const player = document.querySelector("[data-player]");
 const mediaTitle = document.querySelector("[data-media-title]");
-const mediaRange = document.querySelector("[data-media-range]");
-const mediaStop = document.querySelector("[data-media-stop]");
 const youtubeLink = document.querySelector("[data-youtube]");
 const overviewDialog = document.querySelector("[data-overview-dialog]");
 const overviewGrid = document.querySelector(".overview-grid");
@@ -18,10 +16,8 @@ const mentiType = mentiDialog.querySelector("[data-menti-type]");
 const mentiCode = document.querySelector("[data-copy-menti-code]");
 const mentiHelp = document.querySelector("[data-menti-help]");
 const mentiResults = document.querySelector("[data-menti-results]");
-const mentiStatus = document.querySelector("[data-menti-status]");
-const mentiJoinLinks = [...mentiDialog.querySelectorAll("[data-menti-join], [data-menti-join-button]")];
-const mentiQr = document.querySelector("[data-menti-qr]");
-const mentiRejoinCode = document.querySelector("[data-menti-rejoin-code]");
+const mentiJoinLinks = [...document.querySelectorAll("[data-menti-join], [data-menti-join-button]")];
+const mentiQrs = [...document.querySelectorAll("[data-menti-qr]")];
 const MENTI_STORAGE_KEY = "classical-music-menti";
 let current = 0;
 let presentationContent = {};
@@ -192,12 +188,10 @@ function applyVoicePhrases(slide, value) {
 }
 
 function applyMentiContent(slide, content) {
-  const cue = slide.querySelector(".menti-cue");
-  if (!cue) return;
-  if (content["menti-type"] !== undefined) cue.dataset.mentiType = plainText(content["menti-type"]);
-  if (content["menti-question"] !== undefined) cue.dataset.mentiQuestion = plainText(content["menti-question"]);
-  setText(cue, "span", content["menti-label"]);
-  setText(cue, "b", content["menti-action"]);
+  if (content["menti-type"] !== undefined) slide.dataset.mentiType = plainText(content["menti-type"]);
+  else delete slide.dataset.mentiType;
+  if (content["menti-question"] !== undefined) slide.dataset.mentiQuestion = plainText(content["menti-question"]);
+  else delete slide.dataset.mentiQuestion;
 }
 
 function applySlideContent(slide, content) {
@@ -228,20 +222,16 @@ function applySlideContent(slide, content) {
     setRich(slide, ".program-head > p:last-child", content.subtitle);
     applyTracks(slide, content.tracks);
     applyList(slide, ".fact-stack span", content["era-notes"] ?? content.facts);
-  } else if (slide.classList.contains("activity-slide")) {
-    setText(slide, ".film-half .kicker", content["left-kicker"]);
-    setRich(slide, ".film-half h2", content["left-title"]);
-    setRich(slide, ".film-half .subtitle", content["left-subtitle"]);
-    setButtonLabel(slide, ".film-half .watch-button", content["left-watch"]);
-    setText(slide, ".bach-half .kicker", content["right-kicker"]);
-    setRich(slide, ".bach-half h2", content["right-title"]);
-    setButtonLabel(slide, ".bach-half .watch-button", content["right-watch"]);
+  } else if (slide.classList.contains("film-scene-slide")) {
+    setText(slide, ".kicker", content.kicker);
+    setRich(slide, "h2", content.title);
+    setRich(slide, ".subtitle", content.subtitle);
+    setButtonLabel(slide, ".watch-button", content.watch);
+  } else if (slide.classList.contains("listening-activity-slide")) {
+    setText(slide, ".kicker", content.kicker);
+    setRich(slide, "h2", content.title);
+    setButtonLabel(slide, ".watch-button", content.watch);
     applyList(slide, ".three-words span", content.prompts);
-    const tracks = slide.querySelectorAll(".track");
-    if (content["left-media-title"] !== undefined) tracks[0].dataset.title = plainText(content["left-media-title"]);
-    if (content["right-media-title"] !== undefined) tracks[1].dataset.title = plainText(content["right-media-title"]);
-    applyVideoField(tracks[0], content["left-video"]);
-    applyVideoField(tracks[1], content["right-video"]);
   } else if (slide.classList.contains("voice-slide")) {
     setText(slide, ".kicker", content.kicker);
     setRich(slide, "h2", content.title);
@@ -324,18 +314,17 @@ function renderMentiSettings() {
   });
 
   mentiJoinLinks.forEach((link) => { link.href = joinUrl; });
-  mentiQr.src = `https://quickchart.io/qr?${qrParams}`;
-  mentiQr.alt = configured ? "QR code for this Mentimeter presentation" : "QR code for menti.com";
-  mentiRejoinCode.textContent = code ? `Code ${code.replace(/(\d{4})(?=\d)/, "$1 ")}` : "menti.com";
+  mentiQrs.forEach((qr) => {
+    qr.src = `https://quickchart.io/qr?${qrParams}`;
+    qr.alt = configured ? "QR code for this Mentimeter presentation" : "QR code for menti.com";
+  });
   mentiCode.textContent = code ? code.replace(/(\d{4})(?=\d)/, "$1 ") : "Set join code";
   mentiCode.disabled = !code;
   mentiHelp.textContent = configured
     ? "Open the participation link on a second device. Responses appear in the presenter view."
-    : "Presenter: add the participation link and code once, then every Menti cue in the talk will use them.";
+    : "Presenter: add the participation link and code once, then every interactive break in the talk will use them.";
   mentiResults.hidden = !resultsUrl;
   if (resultsUrl) mentiResults.href = resultsUrl;
-  mentiStatus.textContent = configured ? "live" : "setup";
-  mentiStatus.classList.toggle("is-live", configured);
 }
 
 function showMentiSettings() {
@@ -352,9 +341,10 @@ function hideMentiSettings() {
   mentiStage.hidden = false;
 }
 
-function openMenti(trigger) {
-  mentiQuestion.textContent = trigger.dataset.mentiQuestion || "Join the live conversation";
-  mentiType.textContent = trigger.dataset.mentiType || "Audience participation";
+function openMenti(trigger = slides[current]) {
+  const source = (trigger?.dataset.mentiType || trigger?.dataset.mentiQuestion) ? trigger : slides[current];
+  mentiQuestion.textContent = source.dataset.mentiQuestion || "Join the live conversation";
+  mentiType.textContent = source.dataset.mentiType || "Audience participation";
   hideMentiSettings();
   mentiDialog.showModal();
   if (!mentiSettings.code && !mentiSettings.joinUrl) showMentiSettings();
@@ -385,26 +375,12 @@ function closeMedia() {
   if (mediaDialog.open) mediaDialog.close();
 }
 
-function formatTime(totalSeconds) {
-  const seconds = Math.max(0, Math.floor(Number(totalSeconds) || 0));
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const remainder = String(seconds % 60).padStart(2, "0");
-  return hours
-    ? `${hours}:${String(minutes).padStart(2, "0")}:${remainder}`
-    : `${minutes}:${remainder}`;
-}
-
 function openTrack(button) {
   const { video, start = "0", end, title } = button.dataset;
   const params = new URLSearchParams({ autoplay: "1", start, rel: "0", modestbranding: "1" });
   if (end) params.set("end", end);
   player.src = `https://www.youtube-nocookie.com/embed/${video}?${params}`;
   mediaTitle.textContent = title;
-  const startLabel = formatTime(start);
-  const endLabel = end ? formatTime(end) : "the end";
-  mediaRange.textContent = `${startLabel} → ${endLabel}`;
-  mediaStop.textContent = `Stop at ${endLabel}`;
   youtubeLink.href = `https://www.youtube.com/watch?v=${video}&t=${start}s`;
   mediaDialog.showModal();
 }
@@ -488,8 +464,9 @@ document.addEventListener("keydown", (event) => {
     showSlide(slides.length - 1);
   } else if (event.key.toLowerCase() === "m") {
     if (event.repeat) return;
+    if (!slides[current].dataset.mentiType && !slides[current].dataset.mentiQuestion) return;
     event.preventDefault();
-    openMenti(document.querySelector("[data-open-menti]"));
+    openMenti(slides[current]);
   }
 });
 
